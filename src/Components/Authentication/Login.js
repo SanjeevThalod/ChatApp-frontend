@@ -46,7 +46,8 @@ export default function Login() {
                 duration:5000,
                 isClosable:true,
                 status:'error'
-            })
+            });
+            setLoading(false);
             return;
         }
 
