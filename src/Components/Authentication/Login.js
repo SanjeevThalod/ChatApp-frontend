@@ -40,6 +40,13 @@ export default function Login() {
             navigate('chats');
         } catch (error) {
             console.log({error:error});
+            toast({
+                title:'Error',
+                description:'Fields are case Sensitive',
+                duration:5000,
+                isClosable:true,
+                status:'error'
+            })
             return;
         }
 
