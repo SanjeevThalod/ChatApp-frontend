@@ -53,7 +53,8 @@ export default function Login() {
 
     };
     const guestHandler = () => {
-
+        setEmail('guest3@gmail.com');
+        setPass('12345678');
     };
     return (
         <VStack>
