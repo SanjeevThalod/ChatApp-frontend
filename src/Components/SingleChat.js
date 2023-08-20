@@ -22,7 +22,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
   const [socketConnected, setSocketConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState();
-  const { user, selectedChat, setSelectedChat,notification,setNotification } = ChatState();
+  const { user, selectedChat, setSelectedChat, notification, setNotification } = ChatState();
 
   useEffect(() => {
     socket = io(ENDPOINT);
@@ -95,19 +95,29 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
     selectedChatCompare = selectedChat;
     // eslint-disable-next-line
   }, [selectedChat]);
+
   useEffect(() => {
-    socket.on('message recieved', (newMessageRecieved) => {
-      if (!selectedChatCompare || selectedChatCompare._id !== newMessageRecieved.chat._id) {
-        // give notification
-        if(!notification.includes(newMessageRecieved)){
-          setNotification([newMessageRecieved,...notification]);
-          setFetchAgain(!fetchAgain);
+    const handleNewMessageReceived = (newMessageReceived) => {
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
+        if (!notification.includes(newMessageReceived)) {
+          setNotification(prevNotification => [newMessageReceived, ...prevNotification]);
+          setFetchAgain(prevFetchAgain => !prevFetchAgain);
         }
       } else {
-        setMessages([...messages, newMessageRecieved])
+        setMessages(prevMessages => [...prevMessages, newMessageReceived]);
       }
-    });
-  });
+    };
+
+    socket.on('message recieved', handleNewMessageReceived);
+
+    return () => {
+        socket.off('message recieved', handleNewMessageReceived);
+    };
+     // eslint-disable-next-line
+}, [selectedChatCompare, notification]);
+
+
+
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
