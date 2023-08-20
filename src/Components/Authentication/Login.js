@@ -41,8 +41,8 @@ export default function Login() {
         } catch (error) {
             console.log({error:error});
             toast({
-                title:'Error',
-                description:'Fields are case Sensitive',
+                title:'Invalid Credentials',
+                description:'Note:Fields are case Sensitive',
                 duration:5000,
                 isClosable:true,
                 status:'error'
@@ -66,6 +66,7 @@ export default function Login() {
                     bg="purple.100"
                     _hover={{ bg: 'purple.100' }} _
                     _focus={{ bg: 'white', borderColor: 'purple.500' }}
+                    value={email}
                     onChange={(event) => setEmail(event.target.value)} />
             </FormControl>
             <FormControl id='password1' isRequired>
@@ -76,7 +77,8 @@ export default function Login() {
                         type={show ? 'text' : 'password'}
                         colorScheme='purple.400'
                         bg="purple.100"
-                        _hover={{ bg: 'purple.100' }} _
+                        _hover={{ bg: 'purple.100' }}
+                        value={pass}
                         _focus={{ bg: 'white', borderColor: 'purple.500' }}
                         onChange={(event) => setPass(event.target.value)} />
                     <InputRightElement >
