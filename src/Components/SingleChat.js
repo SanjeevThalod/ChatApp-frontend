@@ -10,7 +10,7 @@ import io from 'socket.io-client';
 import './styles.css'
 import ScrollableChat from './ScrollableChat';
 
-const ENDPOINT = '';
+const ENDPOINT = process.env.REACT_APP_URL;
 var socket, selectedChatCompare;
 
 
