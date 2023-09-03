@@ -4,12 +4,14 @@ import MyChats from '../Components/miscellaneous/MyChats';
 import ChatBox from '../Components/miscellaneous/ChatBox';
 import { ChatState } from "../Context/ChatProvider"
 import { useState } from 'react';
+import StartTip from '../Components/StartTip';
 
 export default function Chat() {
     const { user } = ChatState();
     const [fetchAgain,setFetchAgain] = useState(false);
     return (
         <div style={{ width: '100%' }}>
+            <StartTip/>
             {user && <SideDrawer />}
             <Box
                 display='flex'

@@ -3,6 +3,7 @@ import { Container, Box, Text, Tabs, TabList, TabPanels, Tab, TabPanel } from "@
 import Login from '../Components/Authentication/Login'
 import Signup from '../Components/Authentication/Signup'
 import { useNavigate } from 'react-router-dom'
+import StartTip from '../Components/StartTip'
 
 export default function Home() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function Home() {
   },[navigate]);
   return (
     <Container maxW="xl" centerContent justifyContent={'center'}>
+      <StartTip/>
       <Box d="flex"
         justifyContent="center"
         p={'3'}
