@@ -6,7 +6,7 @@ import { getSender, getSenderFull } from '../Config/ChatLogics';
 import ProfileModel from './miscellaneous/ProfileModel';
 import UpdateGroupChatModal from './miscellaneous/UpdateGroupChatModal';
 import axios from 'axios';
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 import './styles.css'
 import ScrollableChat from './ScrollableChat';
 
@@ -26,12 +26,10 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
 
   useEffect(() => {
     socket = io(ENDPOINT);
-    socket.on('connected', () => {
-      socket.emit('setup', user);
-      setSocketConnected(true);
-    });
-    socket.on('typing', () => setIsTyping(true));
-    socket.on('stop typing', () => setIsTyping(false));
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
     // eslint-disable-next-line
   }, [])
   const sendMessage = async (e) => {
@@ -50,7 +48,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
           chatId: selectedChat._id
         }, config);
         socket.emit('new message', data);
-        setMessages([...messages, data]);
+        setMessages(prevMessages => [...prevMessages, data]);
       } catch (error) {
         toast({
           title: 'Could not deliver message',
@@ -76,6 +74,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
       const { data } = await axios.get(`${process.env.REACT_APP_URL}/message/${selectedChat._id}`, config);
       setMessages(data);
       setLoading(false);
+      socket.emit("join chat", selectedChat._id)
     } catch (error) {
       toast({
         title: "Error Occured",
@@ -86,7 +85,6 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
         position: 'bottom'
       });
     }
-    socket.emit('join chat', selectedChat._id);
     setLoading(false);
   }
 
@@ -97,36 +95,34 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
   }, [selectedChat]);
 
   useEffect(() => {
-    const handleNewMessageReceived = (newMessageReceived) => {
-      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
-        if (!notification.includes(newMessageReceived)) {
-          setNotification(prevNotification => [newMessageReceived, ...prevNotification]);
-          setFetchAgain(prevFetchAgain => !prevFetchAgain);
+    socket.on("message recieved", (newMessageRecieved) => {
+      if (
+        !selectedChatCompare || // if chat is not selected or doesn't match current chat
+        selectedChatCompare._id !== newMessageRecieved.chat._id
+      ) {
+        if (!notification.includes(newMessageRecieved)) {
+          setNotification([newMessageRecieved, ...notification]);
+          setFetchAgain(!fetchAgain);
         }
       } else {
-        setMessages(prevMessages => [...prevMessages, newMessageReceived]);
+        setMessages(prevMessages=>[...prevMessages,newMessageRecieved]);
       }
-    };
-
-    socket.on('new message', handleNewMessageReceived);
-
-    return () => {
-        socket.off('message recieved', handleNewMessageReceived);
-    };
-     // eslint-disable-next-line
-}, [selectedChatCompare, notification]);
+    });
+    // eslint-disable-next-line
+  },[]);
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
     //Tying indicator logic
     if (!socketConnected) return;
+
+    const timeLength = 3000;
+    const lastTypingTime = new Date().getTime();
+    
     if (!typing) {
       setTyping(true);
       socket.emit('typing', selectedChat._id);
     }
-
-    const timeLength = 3000;
-    const lastTypingTime = new Date().getTime();
     const typingTimeout = setTimeout(() => {
       const timeNow = new Date().getTime();
       const timeDiff = timeNow - lastTypingTime;
