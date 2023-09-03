@@ -108,16 +108,13 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
       }
     };
 
-    socket.on('message recieved', handleNewMessageReceived);
+    socket.on('new message', handleNewMessageReceived);
 
     return () => {
         socket.off('message recieved', handleNewMessageReceived);
     };
      // eslint-disable-next-line
 }, [selectedChatCompare, notification]);
-
-
-
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
