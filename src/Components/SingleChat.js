@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { ChatState } from '../Context/ChatProvider'
-import { Badge, Box, FormControl, IconButton, Input, Spinner, Text, useToast } from '@chakra-ui/react';
+import { Badge, Box, FormControl, IconButton, Input, InputGroup, InputRightElement, Spinner, Text, useToast } from '@chakra-ui/react';
 import { ArrowBackIcon } from '@chakra-ui/icons';
+import { RiSendPlane2Fill } from "react-icons/ri";
 import { getSender, getSenderFull } from '../Config/ChatLogics';
 import ProfileModel from './miscellaneous/ProfileModel';
 import UpdateGroupChatModal from './miscellaneous/UpdateGroupChatModal';
@@ -12,7 +13,6 @@ import ScrollableChat from './ScrollableChat';
 
 const ENDPOINT = process.env.REACT_APP_URL;
 var socket, selectedChatCompare;
-
 
 export default function SingleChat({ fetchAgain, setFetchAgain }) {
   const toast = useToast();
@@ -32,8 +32,9 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
     socket.on("stop typing", () => setIsTyping(false));
     // eslint-disable-next-line
   }, [])
+
   const sendMessage = async (e) => {
-    if (e.key === 'Enter' && newMessage) {
+    if ((e.key === 'Enter' || e.type === 'click') && newMessage) {
       socket.emit('stop typing', selectedChat._id);
       try {
         const config = {
@@ -60,6 +61,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
       }
     }
   }
+
   const fetchMessages = async () => {
     if (!selectedChat) {
       return;
@@ -113,12 +115,12 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-    //Tying indicator logic
+    // Typing indicator logic
     if (!socketConnected) return;
 
     const timeLength = 3000;
     const lastTypingTime = new Date().getTime();
-    
+
     if (!typing) {
       setTyping(true);
       socket.emit('typing', selectedChat._id);
@@ -136,6 +138,7 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
     // Cleanup the timeout when the component unmounts or when socketConnected changes
     return () => clearTimeout(typingTimeout);
   }
+
   return (
     <>
       {selectedChat ? (
@@ -179,12 +182,22 @@ export default function SingleChat({ fetchAgain, setFetchAgain }) {
             )}
             <FormControl onKeyDown={sendMessage} isRequired mt={3}>
               {isTyping ? <Badge borderRadius={'20px'} p={2} ml={1} mb={1} colorScheme='green'>Typing...</Badge> : null}
-              <Input variant={'filled'}
-                bg={'#e0e0e0'}
-                placeholder='Message'
-                borderRadius={'20px'}
-                onChange={typingHandler}
-                value={newMessage} />
+              <InputGroup>
+                <Input variant={'filled'}
+                  bg={'#e0e0e0'}
+                  placeholder='Message'
+                  borderRadius={'20px'}
+                  onChange={typingHandler}
+                  value={newMessage} />
+                <InputRightElement>
+                  <IconButton
+                    icon={<RiSendPlane2Fill />}
+                    onClick={sendMessage}
+                    colorScheme='blue'
+                    aria-label='Send message'
+                  />
+                </InputRightElement>
+              </InputGroup>
             </FormControl>
           </Box>
         </>) : (
